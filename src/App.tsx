@@ -5,6 +5,7 @@ import { Authenticator } from '@aws-amplify/ui-react'
 // import { get } from 'aws-amplify/api';
 import { fetchAuthSession } from "aws-amplify/auth";
 import '@aws-amplify/ui-react/styles.css'
+import { get } from 'aws-amplify/api';
 
 const client = generateClient<Schema>();
 
@@ -17,24 +18,34 @@ async function getAuthSession() {
   }
 }
 
-// async function getItem() {
-//   try {
-//     const restOperation = get({ 
-//       apiName: 'myRestApi',
-//       path: 'cognito-auth-path' 
-//     });
-//     const response = await restOperation.response;
-//     console.log('GET call succeeded: ', response);
-//   } catch (error) {
-//     console.log('GET call failed: ', JSON.parse(error.response.body));
-//   }
-// }
+async function getItem() {
+
+  const session = await fetchAuthSession();
+  const token = session.tokens?.idToken!;
+
+  try {
+    const restOperation = get({ 
+      apiName: 'myRestApi',
+      path: 'items',
+      // options: {
+      //   headers: {
+      //     Authorization: token.toString(),
+      //   }
+      // }
+    });
+    const response = await restOperation.response;
+    console.log('GET shorse shorse  call succeeded: ', response);
+  } catch (error) {
+    console.log('GET call failed: ', error);
+  }
+}
 
 function App() {
   const [todos, setTodos] = useState<Array<Schema["Todo"]["type"]>>([]);
 
   useEffect(() => {
     getAuthSession();
+    getItem();
     client.models.Todo.observeQuery().subscribe({
       next: (data) => setTodos([...data.items]),
     });

@@ -7,9 +7,13 @@ import outputs from "../amplify_outputs.json";
 
 Amplify.configure(outputs);
 const existingConfig = Amplify.getConfig();
+
+console.log("existingConfig", existingConfig);
+
 Amplify.configure({
   ...existingConfig,
   API: {
+    ...existingConfig.API,
     REST: outputs.custom.API,
   },
 });

@@ -26,17 +26,17 @@ async function getItem() {
   try {
     const restOperation = get({ 
       apiName: 'myRestApi',
-      path: 'items',
-      // options: {
-      //   headers: {
-      //     Authorization: token.toString(),
-      //   }
-      // }
+      path: 'cognito-auth-path',
+      options: {
+        headers: {
+          Authorization: token.toString(),
+        }
+      }
     });
     const response = await restOperation.response;
     console.log('GET shorse shorse  call succeeded: ', response);
   } catch (error) {
-    console.log('GET call failed: ', error);
+    console.log('GET call failed shorse shorse: ', error);
   }
 }
 

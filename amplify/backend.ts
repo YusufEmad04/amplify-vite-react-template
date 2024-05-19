@@ -7,6 +7,8 @@ import {
   LambdaIntegration,
   RestApi,
 } from "aws-cdk-lib/aws-apigateway";
+import * as lambda from 'aws-cdk-lib/aws-lambda';
+import * as appsync from 'aws-cdk-lib/aws-appsync';
 import { Policy, PolicyStatement } from "aws-cdk-lib/aws-iam";
 import { myApiFunction } from "./functions/api-function/resource";
 import { auth } from "./auth/resource";
@@ -36,6 +38,17 @@ const myRestApi = new RestApi(apiStack, "RestApi", {
 const lambdaIntegration = new LambdaIntegration(
   backend.myApiFunction.resources.lambda
 );
+
+const pythonLambda = new lambda.Function(apiStack, "PythonLambda", {
+  runtime: lambda.Runtime.PYTHON_3_8,
+  code: lambda.Code.fromAsset("./functions/python-function"),
+  handler: "handler.handler",
+});
+
+// give access to python lambda to invoke the graphql api
+backend.data.resources.graphqlApi.grantMutation(pythonLambda);
+
+const pythonLambdaIntegration = new LambdaIntegration(pythonLambda);
 
 // create a new resource path with IAM authorization
 const itemsPath = myRestApi.root.addResource("items");

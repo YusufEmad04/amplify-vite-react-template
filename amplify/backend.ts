@@ -13,7 +13,8 @@ import { Policy, PolicyStatement } from "aws-cdk-lib/aws-iam";
 import { myApiFunction } from "./functions/api-function/resource";
 import { auth } from "./auth/resource";
 import { data } from "./data/resource";
-import "./functions/python-function";
+// import "./functions/python-function";
+import * as path from 'path';
 
 const backend = defineBackend({
   auth,
@@ -39,6 +40,11 @@ const myRestApi = new RestApi(apiStack, "RestApi", {
 const lambdaIntegration = new LambdaIntegration(
   backend.myApiFunction.resources.lambda
 );
+
+console.log('Current directory:', __dirname);
+console.log('Resolved path:', path.resolve(__dirname, 'functions/python-function'));
+// console log the contents of the current directory
+console.log('Current directory contents:', require('fs').readdirSync(__dirname));
 
 const pythonLambda = new lambda.Function(apiStack, "PythonLambda", {
   runtime: lambda.Runtime.PYTHON_3_8,

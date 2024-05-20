@@ -64,7 +64,7 @@ const pythonLambda = new lambda.Function(apiStack, "PythonLambda", {
 
 pythonLambda.addToRolePolicy(
   new PolicyStatement({
-    actions: ["appsync:GraphQL"],
+    actions: ["appsync:GraphQL", "appsync:GetGraphqlApi", "appsync:ListGraphqlApis", "appsync:ListTypes"],
     resources: ["*"]
   })
 );

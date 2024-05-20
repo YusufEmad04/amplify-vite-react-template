@@ -7,7 +7,7 @@ import boto3
 def lambda_handler(event, context):
     # Retrieve data from the event
     # For example, if the event is a JSON payload:
-    payload = json.loads(event['body'])
+    print(event)
 
     graphql_api_id = os.environ['GRAPHQL_API_ID']
 

@@ -52,7 +52,8 @@ const pythonLambda = new lambda.Function(apiStack, "PythonLambda", {
 });
 
 // give access to python lambda to invoke the graphql api
-backend.data.resources.graphqlApi.grantMutation(pythonLambda);
+// backend.data.resources.graphqlApi.grantMutation(pythonLambda);
+backend.data.resources.graphqlApi.grant(pythonLambda, appsync.IamResource.all())
 
 const pythonLambdaIntegration = new LambdaIntegration(pythonLambda);
 

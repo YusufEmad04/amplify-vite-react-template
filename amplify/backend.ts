@@ -45,7 +45,7 @@ const lambdaIntegration = new LambdaIntegration(
 const pythonLambda = new lambda.Function(apiStack, "PythonLambda", {
   runtime: lambda.Runtime.PYTHON_3_8,
   code: lambda.Code.fromAsset("amplify/functions/python-function"),
-  handler: "handler.handler",
+  handler: "handler.lambda_handler",
   environment: {
     GRAPHQL_API_ID: backend.data.resources.graphqlApi.apiId,
   },

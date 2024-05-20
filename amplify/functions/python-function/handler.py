@@ -8,6 +8,7 @@ def lambda_handler(event, context):
     # Retrieve data from the event
     # For example, if the event is a JSON payload:
     print(event)
+    auth = event['headers']['Authorization']
 
     graphql_api_id = os.environ['GRAPHQL_API_ID']
 
@@ -15,6 +16,8 @@ def lambda_handler(event, context):
     client = boto3.client('appsync')
 
     r = client.get_graphql_api(apiId=graphql_api_id)
+
+    graphql_url = r['graphqlApi']['uris']['GRAPHQL']
     
     # Perform your logic here
     # For example, you can process the payload and return a response
@@ -24,7 +27,10 @@ def lambda_handler(event, context):
             'Access-Control-Allow-Origin': '*',  # Replace * with your desired origin
             'Access-Control-Allow-Headers': '*'
         },
-        'body': str(r)
+        'body': {
+            "graphql_url": graphql_url,
+            "auth": auth
+        }
     }
     
     return response

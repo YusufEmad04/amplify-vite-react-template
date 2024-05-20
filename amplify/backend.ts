@@ -42,14 +42,14 @@ const lambdaIntegration = new LambdaIntegration(
   backend.myApiFunction.resources.lambda
 );
 
-const graphql = backend.data.resources.graphqlApi as appsync.GraphqlApi;
+const graphql = backend.data.resources.graphqlApi as appsync.GraphqlApi
 
 const pythonLambda = new lambda.Function(apiStack, "PythonLambda", {
   runtime: lambda.Runtime.PYTHON_3_8,
   code: lambda.Code.fromAsset("amplify/functions/python-function"),
   handler: "handler.handler",
   environment: {
-    GRAPHQL_API_ENDPOINT: graphql.graphqlUrl,
+    GRAPHQL_API_ENDPOINT: graphql.graphqlUrl || "",
     GRAPHQL_API_KEY: graphql.apiKey || "",
   },
 });

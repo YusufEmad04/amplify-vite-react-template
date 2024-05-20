@@ -25,12 +25,13 @@ def lambda_handler(event, context):
         'statusCode': 200,
         'headers': {
             'Access-Control-Allow-Origin': '*',  # Replace * with your desired origin
-            'Access-Control-Allow-Headers': '*'
+            'Access-Control-Allow-Headers': '*',
+            'Content-Type': 'application/json'
         },
-        'body': {
+        'body': json.dumps({
             "graphql_url": graphql_url,
             "auth": auth
-        }
+        })
     }
     
     return response

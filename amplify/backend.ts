@@ -44,7 +44,7 @@ const lambdaIntegration = new LambdaIntegration(
 
 const pythonLambda = new lambda.Function(apiStack, "PythonLambda", {
   runtime: lambda.Runtime.PYTHON_3_8,
-  code: lambda.Code.fromAsset("./functions/python-function"),
+  code: lambda.Code.fromAsset("amplify/functions/python-function"),
   handler: "handler.handler",
 });
 

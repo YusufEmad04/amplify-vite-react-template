@@ -39,16 +39,16 @@ const lambdaIntegration = new LambdaIntegration(
   backend.myApiFunction.resources.lambda
 );
 
-// const pythonLambda = new lambda.Function(apiStack, "PythonLambda", {
-//   runtime: lambda.Runtime.PYTHON_3_8,
-//   code: lambda.Code.fromAsset("./functions/python-function"),
-//   handler: "handler.handler",
-// });
+const pythonLambda = new lambda.Function(apiStack, "PythonLambda", {
+  runtime: lambda.Runtime.PYTHON_3_8,
+  code: lambda.Code.fromAsset("functions/python-function"),
+  handler: "handler.handler",
+});
 
 // give access to python lambda to invoke the graphql api
-// backend.data.resources.graphqlApi.grantMutation(pythonLambda);
+backend.data.resources.graphqlApi.grantMutation(pythonLambda);
 
-// const pythonLambdaIntegration = new LambdaIntegration(pythonLambda);
+const pythonLambdaIntegration = new LambdaIntegration(pythonLambda);
 
 // create a new resource path with IAM authorization
 const itemsPath = myRestApi.root.addResource("items");

@@ -14,7 +14,7 @@ import { myApiFunction } from "./functions/api-function/resource";
 // import { myPythonFunction } from "./functions/python-function/resource";
 import { auth } from "./auth/resource";
 import { data } from "./data/resource";
-import "./functions/python-function";
+// import "./functions/python-function";
 // import * as path from 'path';
 
 const backend = defineBackend({

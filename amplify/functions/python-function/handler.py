@@ -12,9 +12,9 @@ def lambda_handler(event, context):
     graphql_api_id = os.environ['GRAPHQL_API_ID']
 
     # connect to graphql appsync
-    # client = boto3.client('appsync')
+    client = boto3.client('appsync')
 
-    # r = client.get_graphql_api(apiId=graphql_api_id)
+    r = client.get_graphql_api(apiId=graphql_api_id)
     
     # Perform your logic here
     # For example, you can process the payload and return a response
@@ -24,7 +24,7 @@ def lambda_handler(event, context):
             'Access-Control-Allow-Origin': '*',  # Replace * with your desired origin
             'Access-Control-Allow-Headers': '*'
         },
-        'body': 'shorse'
+        'body': str(r)
     }
     
     return response

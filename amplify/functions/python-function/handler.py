@@ -1,7 +1,8 @@
-# GRAPHQL_API_ID in environment variables
 import os
 import json
 import boto3
+
+# GRAPHQL_API_ID in environment variables
 
 def lambda_handler(event, context):
     # Retrieve data from the event
@@ -19,7 +20,12 @@ def lambda_handler(event, context):
     # For example, you can process the payload and return a response
     response = {
         'statusCode': 200,
-        'body': r
+        'headers': {
+            'Access-Control-Allow-Origin': '*',  # Replace * with your desired origin
+            'Access-Control-Allow-Headers': '*',
+            'Access-Control-Allow-Methods': '*'  # Add any additional allowed methods
+        },
+        'body': json.dumps(r)
     }
     
     return response

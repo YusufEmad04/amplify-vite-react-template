@@ -93,7 +93,7 @@ const cognitoAuth = new CognitoUserPoolsAuthorizer(apiStack, "CognitoAuth", {
 
 // create a new resource path with Cognito authorization
 const booksPath = myRestApi.root.addResource("cognito-auth-path");
-booksPath.addMethod("GET", lambdaIntegration, {
+booksPath.addMethod("GET", pythonLambdaIntegration, {
   authorizationType: AuthorizationType.COGNITO,
   authorizer: cognitoAuth,
 });

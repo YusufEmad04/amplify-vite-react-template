@@ -53,7 +53,21 @@ const pythonLambda = new lambda.Function(apiStack, "PythonLambda", {
 
 // give access to python lambda to invoke the graphql api
 // backend.data.resources.graphqlApi.grantMutation(pythonLambda);
-backend.data.resources.graphqlApi.grant(pythonLambda, appsync.IamResource.all())
+// const graphqlPolicy = new Policy(apiStack, "GraphqlPolicy", {
+//   statements: [
+//     new PolicyStatement({
+//       actions: ["appsync:GraphQL"],
+//       resources: ["*"]
+//     }),
+//   ],
+// });
+
+pythonLambda.addToRolePolicy(
+  new PolicyStatement({
+    actions: ["appsync:GraphQL"],
+    resources: ["*"]
+  })
+);
 
 const pythonLambdaIntegration = new LambdaIntegration(pythonLambda);
 

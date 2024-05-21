@@ -135,20 +135,17 @@ const codeBuildProject = new codebuild.Project(apiStack, 'DockerImageBuild', {
     privileged: true,
   },
   timeout: Duration.hours(1),
-  environmentVariables: {
-    OPENAI_API_KEY: {
-      value: secret('OPENAI_API_KEY'),
-    },
-    PINECONE_API_KEY: {
-      value: secret('PINECONE_API_KEY'),
-    },
-  },
   buildSpec: codebuild.BuildSpec.fromObject({
     version: '0.2',
     phases: {
       pre_build: {
         commands: [
           //aws ecr get-login-password --region region | docker login --username AWS --password-stdin aws_account_id.dkr.ecr.region.amazonaws.com
+          'secret_json=$(aws secretsmanager get-secret-value --secret-id daas-secrets)',
+          `OPENAI_API_KEY=$(echo ${"$secret_json"} | jq -r ${'.SecretString | fromjson | .OPENAI_API_KEY'})`,
+          `PINECONE_API_KEY=$(echo ${"$secret_json"} | jq -r ${'.SecretString | fromjson | .PINECONE_API_KEY'})`,
+          'export OPENAI_API_KEY=$OPENAI_API',
+          'export PINECONE_API_KEY=$PINECONE_API_KEY',
           `aws ecr get-login-password --region ${Stack.of(apiStack).region} | docker login --username AWS --password-stdin ${Stack.of(apiStack).account}.dkr.ecr.${Stack.of(apiStack).region}.amazonaws.com`
         ],
 
@@ -176,6 +173,74 @@ codeBuildProject.addToRolePolicy(
     resources: ['*'],
   }
 )
+);
+
+codeBuildProject.addToRolePolicy(
+  PolicyStatement.fromJson({
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "BasePermissions",
+            "Effect": "Allow",
+            "Action": [
+                "secretsmanager:*",
+                "cloudformation:CreateChangeSet",
+                "cloudformation:DescribeChangeSet",
+                "cloudformation:DescribeStackResource",
+                "cloudformation:DescribeStacks",
+                "cloudformation:ExecuteChangeSet",
+                "docdb-elastic:GetCluster",
+                "docdb-elastic:ListClusters",
+                "ec2:DescribeSecurityGroups",
+                "ec2:DescribeSubnets",
+                "ec2:DescribeVpcs",
+                "kms:DescribeKey",
+                "kms:ListAliases",
+                "kms:ListKeys",
+                "lambda:ListFunctions",
+                "rds:DescribeDBClusters",
+                "rds:DescribeDBInstances",
+                "redshift:DescribeClusters",
+                "redshift-serverless:ListWorkgroups",
+                "redshift-serverless:GetNamespace",
+                "tag:GetResources"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "LambdaPermissions",
+            "Effect": "Allow",
+            "Action": [
+                "lambda:AddPermission",
+                "lambda:CreateFunction",
+                "lambda:GetFunction",
+                "lambda:InvokeFunction",
+                "lambda:UpdateFunctionConfiguration"
+            ],
+            "Resource": "arn:aws:lambda:*:*:function:SecretsManager*"
+        },
+        {
+            "Sid": "SARPermissions",
+            "Effect": "Allow",
+            "Action": [
+                "serverlessrepo:CreateCloudFormationChangeSet",
+                "serverlessrepo:GetApplication"
+            ],
+            "Resource": "arn:aws:serverlessrepo:*:*:applications/SecretsManager*"
+        },
+        {
+            "Sid": "S3Permissions",
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetObject"
+            ],
+            "Resource": [
+                "arn:aws:s3:::awsserverlessrepo-changesets*",
+                "arn:aws:s3:::secrets-manager-rotation-apps-*/*"
+            ]
+        }
+    ]
+})
 );
 
 const dockerPath = myRestApi.root.addResource("docker");

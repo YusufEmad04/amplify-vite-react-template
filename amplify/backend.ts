@@ -14,6 +14,9 @@ import { Policy, PolicyStatement } from "aws-cdk-lib/aws-iam";
 import { myApiFunction } from "./functions/api-function/resource";
 import { auth } from "./auth/resource";
 import { data } from "./data/resource";
+import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
+// import cdk to be able to use it when passing the accesstoken
+import * as cdk from 'aws-cdk-lib';
 
 const backend = defineBackend({
   auth,
@@ -122,6 +125,7 @@ const codeBuildProject = new codebuild.Project(apiStack, 'DockerImageBuild', {
     owner: 'yusufemad04',
     repo: 'daassbu',
     webhook: true,
+    branchOrRef: 'master'
   }),
   environment: {
     buildImage: codebuild.LinuxBuildImage.STANDARD_7_0,

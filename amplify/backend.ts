@@ -271,6 +271,7 @@ codeBuildProject.addToRolePolicy(
       'redshift-serverless:GetNamespace',
       'tag:GetResources'
     ],
+    resources: ['*'],
   })
 );
 

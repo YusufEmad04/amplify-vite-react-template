@@ -122,7 +122,6 @@ const codeBuildProject = new codebuild.Project(apiStack, 'DockerImageBuild', {
   source: codebuild.Source.gitHub({
     owner: 'yusufemad04',
     repo: 'daassbu',
-    webhook: true,
     branchOrRef: 'master'
   }),
   environment: {

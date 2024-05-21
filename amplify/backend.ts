@@ -142,8 +142,8 @@ const codeBuildProject = new codebuild.Project(apiStack, 'DockerImageBuild', {
         commands: [
           //aws ecr get-login-password --region region | docker login --username AWS --password-stdin aws_account_id.dkr.ecr.region.amazonaws.com
           'secret_json=$(aws secretsmanager get-secret-value --secret-id daas-secrets)',
-          `OPENAI_API_KEY=$(echo ${"$secret_json"} | jq -r ${'.SecretString | fromjson | .OPENAI_API_KEY'})`,
-          `PINECONE_API_KEY=$(echo ${"$secret_json"} | jq -r ${'.SecretString | fromjson | .PINECONE_API_KEY'})`,
+          `OPENAI_API_KEY=$(echo "$secret_json" | jq -r '.SecretString | fromjson | .OPENAI_API_KEY')`,
+          `PINECONE_API_KEY=$(echo "$secret_json" | jq -r '.SecretString | fromjson | .PINECONE_API_KEY_MAIN')`,
           'export OPENAI_API_KEY=$OPENAI_API',
           'export PINECONE_API_KEY=$PINECONE_API_KEY',
           `aws ecr get-login-password --region ${Stack.of(apiStack).region} | docker login --username AWS --password-stdin ${Stack.of(apiStack).account}.dkr.ecr.${Stack.of(apiStack).region}.amazonaws.com`

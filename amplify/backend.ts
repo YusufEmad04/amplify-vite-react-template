@@ -10,7 +10,7 @@ import {
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as ecr from 'aws-cdk-lib/aws-ecr';
 import * as codebuild from 'aws-cdk-lib/aws-codebuild';
-import { Policy, PolicyStatement } from "aws-cdk-lib/aws-iam";
+import { Effect, Policy, PolicyStatement } from "aws-cdk-lib/aws-iam";
 import { myApiFunction } from "./functions/api-function/resource";
 import { auth } from "./auth/resource";
 import { data } from "./data/resource";
@@ -175,72 +175,142 @@ codeBuildProject.addToRolePolicy(
 )
 );
 
+// codeBuildProject.addToRolePolicy(
+//   PolicyStatement.fromJson({
+//     "Version": "2012-10-17",
+//     "Statement": [
+//         {
+//             "Sid": "BasePermissions",
+//             "Effect": "Allow",
+//             "Action": [
+//                 "secretsmanager:*",
+//                 "cloudformation:CreateChangeSet",
+//                 "cloudformation:DescribeChangeSet",
+//                 "cloudformation:DescribeStackResource",
+//                 "cloudformation:DescribeStacks",
+//                 "cloudformation:ExecuteChangeSet",
+//                 "docdb-elastic:GetCluster",
+//                 "docdb-elastic:ListClusters",
+//                 "ec2:DescribeSecurityGroups",
+//                 "ec2:DescribeSubnets",
+//                 "ec2:DescribeVpcs",
+//                 "kms:DescribeKey",
+//                 "kms:ListAliases",
+//                 "kms:ListKeys",
+//                 "lambda:ListFunctions",
+//                 "rds:DescribeDBClusters",
+//                 "rds:DescribeDBInstances",
+//                 "redshift:DescribeClusters",
+//                 "redshift-serverless:ListWorkgroups",
+//                 "redshift-serverless:GetNamespace",
+//                 "tag:GetResources"
+//             ],
+//             "Resource": "*"
+//         },
+//         {
+//             "Sid": "LambdaPermissions",
+//             "Effect": "Allow",
+//             "Action": [
+//                 "lambda:AddPermission",
+//                 "lambda:CreateFunction",
+//                 "lambda:GetFunction",
+//                 "lambda:InvokeFunction",
+//                 "lambda:UpdateFunctionConfiguration"
+//             ],
+//             "Resource": "arn:aws:lambda:*:*:function:SecretsManager*"
+//         },
+//         {
+//             "Sid": "SARPermissions",
+//             "Effect": "Allow",
+//             "Action": [
+//                 "serverlessrepo:CreateCloudFormationChangeSet",
+//                 "serverlessrepo:GetApplication"
+//             ],
+//             "Resource": "arn:aws:serverlessrepo:*:*:applications/SecretsManager*"
+//         },
+//         {
+//             "Sid": "S3Permissions",
+//             "Effect": "Allow",
+//             "Action": [
+//                 "s3:GetObject"
+//             ],
+//             "Resource": [
+//                 "arn:aws:s3:::awsserverlessrepo-changesets*",
+//                 "arn:aws:s3:::secrets-manager-rotation-apps-*/*"
+//             ]
+//         }
+//     ]
+// })
+// );
+
+// same as above
 codeBuildProject.addToRolePolicy(
-  PolicyStatement.fromJson({
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Sid": "BasePermissions",
-            "Effect": "Allow",
-            "Action": [
-                "secretsmanager:*",
-                "cloudformation:CreateChangeSet",
-                "cloudformation:DescribeChangeSet",
-                "cloudformation:DescribeStackResource",
-                "cloudformation:DescribeStacks",
-                "cloudformation:ExecuteChangeSet",
-                "docdb-elastic:GetCluster",
-                "docdb-elastic:ListClusters",
-                "ec2:DescribeSecurityGroups",
-                "ec2:DescribeSubnets",
-                "ec2:DescribeVpcs",
-                "kms:DescribeKey",
-                "kms:ListAliases",
-                "kms:ListKeys",
-                "lambda:ListFunctions",
-                "rds:DescribeDBClusters",
-                "rds:DescribeDBInstances",
-                "redshift:DescribeClusters",
-                "redshift-serverless:ListWorkgroups",
-                "redshift-serverless:GetNamespace",
-                "tag:GetResources"
-            ],
-            "Resource": "*"
-        },
-        {
-            "Sid": "LambdaPermissions",
-            "Effect": "Allow",
-            "Action": [
-                "lambda:AddPermission",
-                "lambda:CreateFunction",
-                "lambda:GetFunction",
-                "lambda:InvokeFunction",
-                "lambda:UpdateFunctionConfiguration"
-            ],
-            "Resource": "arn:aws:lambda:*:*:function:SecretsManager*"
-        },
-        {
-            "Sid": "SARPermissions",
-            "Effect": "Allow",
-            "Action": [
-                "serverlessrepo:CreateCloudFormationChangeSet",
-                "serverlessrepo:GetApplication"
-            ],
-            "Resource": "arn:aws:serverlessrepo:*:*:applications/SecretsManager*"
-        },
-        {
-            "Sid": "S3Permissions",
-            "Effect": "Allow",
-            "Action": [
-                "s3:GetObject"
-            ],
-            "Resource": [
-                "arn:aws:s3:::awsserverlessrepo-changesets*",
-                "arn:aws:s3:::secrets-manager-rotation-apps-*/*"
-            ]
-        }
-    ]
-})
+  new PolicyStatement({
+    sid: 'BasePermissions',
+    effect: Effect.ALLOW,
+    actions: [
+      'secretsmanager:*',
+      'cloudformation:CreateChangeSet',
+      'cloudformation:DescribeChangeSet',
+      'cloudformation:DescribeStackResource',
+      'cloudformation:DescribeStacks',
+      'cloudformation:ExecuteChangeSet',
+      'docdb-elastic:GetCluster',
+      'docdb-elastic:ListClusters',
+      'ec2:DescribeSecurityGroups',
+      'ec2:DescribeSubnets',
+      'ec2:DescribeVpcs',
+      'kms:DescribeKey',
+      'kms:ListAliases',
+      'kms:ListKeys',
+      'lambda:ListFunctions',
+      'rds:DescribeDBClusters',
+      'rds:DescribeDBInstances',
+      'redshift:DescribeClusters',
+      'redshift-serverless:ListWorkgroups',
+      'redshift-serverless:GetNamespace',
+      'tag:GetResources'
+    ],
+  })
+);
+
+codeBuildProject.addToRolePolicy(
+  new PolicyStatement({
+    sid: 'LambdaPermissions',
+    effect: Effect.ALLOW,
+    actions: [
+      'lambda:AddPermission',
+      'lambda:CreateFunction',
+      'lambda:GetFunction',
+      'lambda:InvokeFunction',
+      'lambda:UpdateFunctionConfiguration'
+    ],
+    resources: ['arn:aws:lambda:*:*:function:SecretsManager*'],
+  })
+);
+
+codeBuildProject.addToRolePolicy(
+  new PolicyStatement({
+    sid: 'SARPermissions',
+    effect: Effect.ALLOW,
+    actions: [
+      'serverlessrepo:CreateCloudFormationChangeSet',
+      'serverlessrepo:GetApplication'
+    ],
+    resources: ['arn:aws:serverlessrepo:*:*:applications/SecretsManager*'],
+  })
+);
+
+codeBuildProject.addToRolePolicy(
+  new PolicyStatement({
+    sid: 'S3Permissions',
+    effect: Effect.ALLOW,
+    actions: ['s3:GetObject'],
+    resources: [
+      'arn:aws:s3:::awsserverlessrepo-changesets*',
+      'arn:aws:s3:::secrets-manager-rotation-apps-*/*'
+    ],
+  })
 );
 
 const dockerPath = myRestApi.root.addResource("docker");

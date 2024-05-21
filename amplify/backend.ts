@@ -108,7 +108,7 @@ backend.auth.resources.unauthenticatedUserIamRole.attachInlinePolicy(
 );
 
 const ecrRepositeory = new ecr.Repository(apiStack, 'Agents', {
-  repositoryName: 'agents',
+  repositoryName: 'daas-agents',
 });
 
 const pythonLambdaDocker = new lambda.DockerImageFunction(apiStack, 'PythonLambdaDocker', {

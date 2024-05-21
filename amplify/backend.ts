@@ -27,7 +27,7 @@ const backend = defineBackend({
 // create a new API stack
 const apiStack = backend.createStack("api-stack");
 
-const secretManager = secretsmanager.Secret.fromSecretNameV2(apiStack, 'SecretsManager', 'daas-secrets')
+const secretManager = secretsmanager.Secret.fromSecretNameV2(apiStack, 'SecretManager', 'daas-secrets')
 // create a new REST API
 const myRestApi = new RestApi(apiStack, "RestApi", {
   restApiName: "myRestApi",

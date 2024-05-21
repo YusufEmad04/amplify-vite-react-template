@@ -27,6 +27,7 @@ const backend = defineBackend({
 // create a new API stack
 const apiStack = backend.createStack("api-stack");
 
+const secretManager = secretsmanager.Secret.fromSecretCompleteArn(apiStack, "SecretsManager", "arn:aws:secretsmanager:us-west-1:073619244051:secret:daas-secrets-0U0xFI")
 // create a new REST API
 const myRestApi = new RestApi(apiStack, "RestApi", {
   restApiName: "myRestApi",
@@ -52,6 +53,9 @@ const pythonLambda = new lambda.Function(apiStack, "PythonLambda", {
   },
 });
 
+new codebuild.GitHubSourceCredentials(apiStack, "test", {
+  accessToken: secretManager.secretValueFromJson("GITHUB_ACCESS_TOKEN")
+})
 
 pythonLambda.addToRolePolicy(
   new PolicyStatement({
@@ -122,7 +126,8 @@ const codeBuildProject = new codebuild.Project(apiStack, 'DockerImageBuild', {
   source: codebuild.Source.gitHub({
     owner: 'yusufemad04',
     repo: 'daassbu',
-    branchOrRef: 'master'
+    branchOrRef: 'master',
+    webhook: true
   }),
   environment: {
     buildImage: codebuild.LinuxBuildImage.STANDARD_7_0,

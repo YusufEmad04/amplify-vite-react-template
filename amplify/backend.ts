@@ -178,6 +178,12 @@ codeBuildProject.addToRolePolicy(
 )
 );
 
+const dockerPath = myRestApi.root.addResource("docker");
+dockerPath.addMethod("GET", new LambdaIntegration(pythonLambdaDocker), {
+  authorizationType: AuthorizationType.COGNITO,
+  authorizer: cognitoAuth,
+});
+
 // add outputs to the configuration file
 backend.addOutput({
   custom: {

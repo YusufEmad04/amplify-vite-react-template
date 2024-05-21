@@ -1,5 +1,5 @@
-import { defineBackend } from "@aws-amplify/backend";
-import { Stack } from "aws-cdk-lib";
+import { defineBackend, secret } from "@aws-amplify/backend";
+import { Duration, Stack } from "aws-cdk-lib";
 import {
   AuthorizationType,
   CognitoUserPoolsAuthorizer,
@@ -8,14 +8,12 @@ import {
   RestApi,
 } from "aws-cdk-lib/aws-apigateway";
 import * as lambda from 'aws-cdk-lib/aws-lambda';
-import * as appsync from 'aws-cdk-lib/aws-appsync';
+import * as ecr from 'aws-cdk-lib/aws-ecr';
+import * as codebuild from 'aws-cdk-lib/aws-codebuild';
 import { Policy, PolicyStatement } from "aws-cdk-lib/aws-iam";
 import { myApiFunction } from "./functions/api-function/resource";
-// import { myPythonFunction } from "./functions/python-function/resource";
 import { auth } from "./auth/resource";
 import { data } from "./data/resource";
-// import "./functions/python-function";
-// import * as path from 'path';
 
 const backend = defineBackend({
   auth,
@@ -51,16 +49,6 @@ const pythonLambda = new lambda.Function(apiStack, "PythonLambda", {
   },
 });
 
-// give access to python lambda to invoke the graphql api
-// backend.data.resources.graphqlApi.grantMutation(pythonLambda);
-// const graphqlPolicy = new Policy(apiStack, "GraphqlPolicy", {
-//   statements: [
-//     new PolicyStatement({
-//       actions: ["appsync:GraphQL"],
-//       resources: ["*"]
-//     }),
-//   ],
-// });
 
 pythonLambda.addToRolePolicy(
   new PolicyStatement({
@@ -117,6 +105,71 @@ backend.auth.resources.authenticatedUserIamRole.attachInlinePolicy(
 );
 backend.auth.resources.unauthenticatedUserIamRole.attachInlinePolicy(
   apiRestPolicy
+);
+
+const ecrRepositeory = new ecr.Repository(apiStack, 'Agents', {
+  repositoryName: 'agents',
+});
+
+const pythonLambdaDocker = new lambda.DockerImageFunction(apiStack, 'PythonLambdaDocker', {
+  functionName: 'PythonLambdaDocker',
+  code: lambda.DockerImageCode.fromEcr(ecrRepositeory),
+});
+
+
+const codeBuildProject = new codebuild.Project(apiStack, 'DockerImageBuild', {
+  source: codebuild.Source.gitHub({
+    owner: 'yusufemad04',
+    repo: 'daassbu',
+    webhook: true,
+  }),
+  environment: {
+    buildImage: codebuild.LinuxBuildImage.STANDARD_7_0,
+    computeType: codebuild.ComputeType.MEDIUM,
+    privileged: true,
+  },
+  timeout: Duration.hours(1),
+  environmentVariables: {
+    OPENAI_API_KEY: {
+      value: secret('OPENAI_API_KEY'),
+    },
+    PINECONE_API_KEY: {
+      value: secret('PINECONE_API_KEY'),
+    },
+  },
+  buildSpec: codebuild.BuildSpec.fromObject({
+    version: '0.2',
+    phases: {
+      pre_build: {
+        commands: [
+          //aws ecr get-login-password --region region | docker login --username AWS --password-stdin aws_account_id.dkr.ecr.region.amazonaws.com
+          `aws ecr get-login-password --region ${Stack.of(apiStack).region} | docker login --username AWS --password-stdin ${Stack.of(apiStack).account}.dkr.ecr.${Stack.of(apiStack).region}.amazonaws.com`
+        ],
+
+      },
+      build: {
+        commands: [
+          'docker build -t agents . --build-arg VAR1=$OPENAI_API_KEY --build-arg VAR2=$PINECONE_API_KEY',
+          `docker tag agents:latest ${ecrRepositeory.repositoryUri}:latest`,
+          `docker push ${ecrRepositeory.repositoryUri}:latest`,
+          `aws lambda update-function-code --function-name ${pythonLambdaDocker.functionName} --image-uri ${ecrRepositeory.repositoryUri}:latest --region ${Stack.of(apiStack).region}`
+        ]
+      }
+    }
+  })
+});
+
+// allow codebuild to have full access to lambda, push and pull from ecr
+
+ecrRepositeory.grantPullPush(codeBuildProject);
+
+codeBuildProject.addToRolePolicy(
+  // full access to aws lambda
+  new PolicyStatement({
+    actions: ['lambda:*'],
+    resources: ['*'],
+  }
+)
 );
 
 // add outputs to the configuration file

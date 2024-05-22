@@ -124,7 +124,7 @@ const pythonLambdaDocker = new lambda.DockerImageFunction(apiStack, 'PythonLambd
 const retrieveSecretsCommands = `secret_json=$(aws secretsmanager get-secret-value --secret-id daas-secrets)
 OPENAI_API_KEY=$(echo "$secret_json" | jq -r '.SecretString | fromjson | .OPENAI_API_KEY')
 PINECONE_API_KEY=$(echo "$secret_json" | jq -r '.SecretString | fromjson | .PINECONE_API_KEY_MAIN')
-export OPENAI_API_KEY=$OPENAI_API
+export OPENAI_API_KEY=$OPENAI_API_KEY
 export PINECONE_API_KEY=$PINECONE_API_KEY`;
 
 const codeBuildProject = new codebuild.Project(apiStack, 'DockerImageBuild', {

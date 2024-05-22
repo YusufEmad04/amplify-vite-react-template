@@ -129,7 +129,8 @@ const retrieveSecretsCommands = `secret_json=$(aws secretsmanager get-secret-val
 OPENAI_API_KEY=$(echo "$secret_json" | jq -r '.SecretString | fromjson | .OPENAI_API_KEY')
 PINECONE_API_KEY=$(echo "$secret_json" | jq -r '.SecretString | fromjson | .PINECONE_API_KEY_MAIN')
 export OPENAI_API_KEY=$OPENAI_API_KEY
-export PINECONE_API_KEY=$PINECONE_API_KEY`;
+export PINECONE_API_KEY=$PINECONE_API_KEY
+export GRAPHQL_API_ID=${backend.data.resources.graphqlApi.apiId}`;
 
 const codeBuildProject = new codebuild.Project(apiStack, 'DockerImageBuild', {
   source: codebuild.Source.gitHub({

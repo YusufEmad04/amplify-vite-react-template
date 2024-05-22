@@ -121,7 +121,15 @@ const ecrRepositeory = ecr.Repository.fromRepositoryName(apiStack, 'Agents', 'da
 const pythonLambdaDocker = new lambda.DockerImageFunction(apiStack, 'PythonLambdaDocker', {
   functionName: 'PythonLambdaDocker',
   code: lambda.DockerImageCode.fromEcr(ecrRepositeory),
+  timeout: Duration.seconds(300),
 });
+
+pythonLambdaDocker.addToRolePolicy(
+  new PolicyStatement({
+    actions: ["appsync:GraphQL", "appsync:GetGraphqlApi", "appsync:ListGraphqlApis", "appsync:ListTypes"],
+    resources: ["*"]
+  })
+);
 
 //TODO: add graphql app id to env vars of docker
 
@@ -157,7 +165,7 @@ const codeBuildProject = new codebuild.Project(apiStack, 'DockerImageBuild', {
       },
       build: {
         commands: [
-          'docker build -t agents . --build-arg VAR1=$OPENAI_API_KEY --build-arg VAR2=$PINECONE_API_KEY',
+          'docker build -t agents . --build-arg VAR1=$OPENAI_API_KEY --build-arg VAR2=$PINECONE_API_KEY --build-arg VAR3=$GRAPHQL_API_ID',
           `docker tag agents:latest ${ecrRepositeory.repositoryUri}:latest`,
           `docker push ${ecrRepositeory.repositoryUri}:latest`,
           `aws lambda update-function-code --function-name ${pythonLambdaDocker.functionName} --image-uri ${ecrRepositeory.repositoryUri}:latest --region ${Stack.of(apiStack).region}`

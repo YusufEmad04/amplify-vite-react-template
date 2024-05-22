@@ -27,9 +27,7 @@ const backend = defineBackend({
 // create a new API stack
 const apiStack = backend.createStack("api-stack");
 
-console.log("-----------------");
-console.log(apiStack.nestedStackParent);
-console.log("-----------------");
+cdk.Tags.of(apiStack.nestedStackParent!).add("awsApplication", "arn:aws:resource-groups:eu-west-1:073619244051:group/daas/0e5tj7gp03v6da3v86igo94dzp");
 
 const secretManager = secretsmanager.Secret.fromSecretNameV2(apiStack, 'SecretManager', 'daas-secrets')
 // create a new REST API

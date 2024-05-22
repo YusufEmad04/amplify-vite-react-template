@@ -121,6 +121,11 @@ const pythonLambdaDocker = new lambda.DockerImageFunction(apiStack, 'PythonLambd
   code: lambda.DockerImageCode.fromEcr(ecrRepositeory),
 });
 
+const retrieveSecretsCommands = `secret_json=$(aws secretsmanager get-secret-value --secret-id daas-secrets)
+OPENAI_API_KEY=$(echo "$secret_json" | jq -r '.SecretString | fromjson | .OPENAI_API_KEY')
+PINECONE_API_KEY=$(echo "$secret_json" | jq -r '.SecretString | fromjson | .PINECONE_API_KEY_MAIN')
+export OPENAI_API_KEY=$OPENAI_API
+export PINECONE_API_KEY=$PINECONE_API_KEY`;
 
 const codeBuildProject = new codebuild.Project(apiStack, 'DockerImageBuild', {
   source: codebuild.Source.gitHub({
@@ -140,18 +145,16 @@ const codeBuildProject = new codebuild.Project(apiStack, 'DockerImageBuild', {
     phases: {
       pre_build: {
         commands: [
-          //aws ecr get-login-password --region region | docker login --username AWS --password-stdin aws_account_id.dkr.ecr.region.amazonaws.com
-          'secret_json=$(aws secretsmanager get-secret-value --secret-id daas-secrets)',
-          `OPENAI_API_KEY=$(echo "$secret_json" | jq -r '.SecretString | fromjson | .OPENAI_API_KEY')`,
-          `PINECONE_API_KEY=$(echo "$secret_json" | jq -r '.SecretString | fromjson | .PINECONE_API_KEY_MAIN')`,
-          'export OPENAI_API_KEY=$OPENAI_API',
-          'export PINECONE_API_KEY=$PINECONE_API_KEY',
+          retrieveSecretsCommands,
           `aws ecr get-login-password --region ${Stack.of(apiStack).region} | docker login --username AWS --password-stdin ${Stack.of(apiStack).account}.dkr.ecr.${Stack.of(apiStack).region}.amazonaws.com`
         ],
 
       },
       build: {
         commands: [
+          'echo "api keys"',
+          'echo $OPENAI_API_KEY',
+          'echo $PINECONE_API_KEY',
           'docker build -t agents . --build-arg VAR1=$OPENAI_API_KEY --build-arg VAR2=$PINECONE_API_KEY',
           `docker tag agents:latest ${ecrRepositeory.repositoryUri}:latest`,
           `docker push ${ecrRepositeory.repositoryUri}:latest`,
@@ -174,74 +177,6 @@ codeBuildProject.addToRolePolicy(
   }
 )
 );
-
-// codeBuildProject.addToRolePolicy(
-//   PolicyStatement.fromJson({
-//     "Version": "2012-10-17",
-//     "Statement": [
-//         {
-//             "Sid": "BasePermissions",
-//             "Effect": "Allow",
-//             "Action": [
-//                 "secretsmanager:*",
-//                 "cloudformation:CreateChangeSet",
-//                 "cloudformation:DescribeChangeSet",
-//                 "cloudformation:DescribeStackResource",
-//                 "cloudformation:DescribeStacks",
-//                 "cloudformation:ExecuteChangeSet",
-//                 "docdb-elastic:GetCluster",
-//                 "docdb-elastic:ListClusters",
-//                 "ec2:DescribeSecurityGroups",
-//                 "ec2:DescribeSubnets",
-//                 "ec2:DescribeVpcs",
-//                 "kms:DescribeKey",
-//                 "kms:ListAliases",
-//                 "kms:ListKeys",
-//                 "lambda:ListFunctions",
-//                 "rds:DescribeDBClusters",
-//                 "rds:DescribeDBInstances",
-//                 "redshift:DescribeClusters",
-//                 "redshift-serverless:ListWorkgroups",
-//                 "redshift-serverless:GetNamespace",
-//                 "tag:GetResources"
-//             ],
-//             "Resource": "*"
-//         },
-//         {
-//             "Sid": "LambdaPermissions",
-//             "Effect": "Allow",
-//             "Action": [
-//                 "lambda:AddPermission",
-//                 "lambda:CreateFunction",
-//                 "lambda:GetFunction",
-//                 "lambda:InvokeFunction",
-//                 "lambda:UpdateFunctionConfiguration"
-//             ],
-//             "Resource": "arn:aws:lambda:*:*:function:SecretsManager*"
-//         },
-//         {
-//             "Sid": "SARPermissions",
-//             "Effect": "Allow",
-//             "Action": [
-//                 "serverlessrepo:CreateCloudFormationChangeSet",
-//                 "serverlessrepo:GetApplication"
-//             ],
-//             "Resource": "arn:aws:serverlessrepo:*:*:applications/SecretsManager*"
-//         },
-//         {
-//             "Sid": "S3Permissions",
-//             "Effect": "Allow",
-//             "Action": [
-//                 "s3:GetObject"
-//             ],
-//             "Resource": [
-//                 "arn:aws:s3:::awsserverlessrepo-changesets*",
-//                 "arn:aws:s3:::secrets-manager-rotation-apps-*/*"
-//             ]
-//         }
-//     ]
-// })
-// );
 
 // same as above
 codeBuildProject.addToRolePolicy(

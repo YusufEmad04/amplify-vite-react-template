@@ -27,6 +27,10 @@ const backend = defineBackend({
 // create a new API stack
 const apiStack = backend.createStack("api-stack");
 
+console.log("-----------------");
+console.log(apiStack.nestedStackParent);
+console.log("-----------------");
+
 const secretManager = secretsmanager.Secret.fromSecretNameV2(apiStack, 'SecretManager', 'daas-secrets')
 // create a new REST API
 const myRestApi = new RestApi(apiStack, "RestApi", {
@@ -121,6 +125,8 @@ const pythonLambdaDocker = new lambda.DockerImageFunction(apiStack, 'PythonLambd
   code: lambda.DockerImageCode.fromEcr(ecrRepositeory),
 });
 
+//TODO: add graphql app id to env vars of docker
+
 const retrieveSecretsCommands = `secret_json=$(aws secretsmanager get-secret-value --secret-id daas-secrets)
 OPENAI_API_KEY=$(echo "$secret_json" | jq -r '.SecretString | fromjson | .OPENAI_API_KEY')
 PINECONE_API_KEY=$(echo "$secret_json" | jq -r '.SecretString | fromjson | .PINECONE_API_KEY_MAIN')
@@ -152,9 +158,6 @@ const codeBuildProject = new codebuild.Project(apiStack, 'DockerImageBuild', {
       },
       build: {
         commands: [
-          'echo "api keys"',
-          'echo $OPENAI_API_KEY',
-          'echo $PINECONE_API_KEY',
           'docker build -t agents . --build-arg VAR1=$OPENAI_API_KEY --build-arg VAR2=$PINECONE_API_KEY',
           `docker tag agents:latest ${ecrRepositeory.repositoryUri}:latest`,
           `docker push ${ecrRepositeory.repositoryUri}:latest`,

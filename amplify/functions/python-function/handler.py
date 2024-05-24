@@ -29,6 +29,7 @@ def lambda_handler(event, context):
                 "auth": auth
             }
         )
+    )
     # Perform your logic here
     # For example, you can process the payload and return a response
     response = {

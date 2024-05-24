@@ -19,6 +19,8 @@ def lambda_handler(event, context):
 
     graphql_url = r['graphqlApi']['uris']['GRAPHQL']
 
+    client = boto3.client('lambda')
+
     # invoke the lambda function called PythonLambdaDocker
     response = client.invoke(
         FunctionName='PythonLambdaDocker',

@@ -26,7 +26,7 @@ async function getItem() {
   try {
     const restOperation = get({ 
       apiName: 'myRestApi',
-      path: 'docker',
+      path: 'cognito-auth-path',
       options: {
         headers: {
           Authorization: token.toString(),

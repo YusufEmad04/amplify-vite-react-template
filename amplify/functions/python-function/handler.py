@@ -18,7 +18,17 @@ def lambda_handler(event, context):
     r = client.get_graphql_api(apiId=graphql_api_id)
 
     graphql_url = r['graphqlApi']['uris']['GRAPHQL']
-    
+
+    # invoke the lambda function called PythonLambdaDocker
+    response = client.invoke(
+        FunctionName='PythonLambdaDocker',
+        InvocationType='Event',
+        Payload=json.dumps(
+            {
+                "graphql_url": graphql_url,
+                "auth": auth
+            }
+        )
     # Perform your logic here
     # For example, you can process the payload and return a response
     response = {

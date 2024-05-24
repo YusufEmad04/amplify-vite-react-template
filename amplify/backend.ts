@@ -265,6 +265,8 @@ dockerPath.addMethod("GET", new LambdaIntegration(pythonLambdaDocker), {
   authorizer: cognitoAuth,
 });
 
+pythonLambdaDocker.grantInvoke(pythonLambda)
+
 // add outputs to the configuration file
 backend.addOutput({
   custom: {

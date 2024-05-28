@@ -27,12 +27,11 @@ const backend = defineBackend({
 // create a new API stack
 const apiStack = backend.createStack("api-stack");
 
-cdk.Tags.of(apiStack.nestedStackParent!).add("awsApplication", "arn:aws:resource-groups:eu-west-1:073619244051:group/daas/0e5tj7gp03v6da3v86igo94dzp");
+// cdk.Tags.of(apiStack.nestedStackParent!).add("awsApplication", "arn:aws:resource-groups:eu-west-1:073619244051:group/daas/0e5tj7gp03v6da3v86igo94dzp");
 
 const secretManager = secretsmanager.Secret.fromSecretNameV2(apiStack, 'SecretManager', 'daas-secrets')
 // create a new REST API
 const myRestApi = new RestApi(apiStack, "RestApi", {
-  restApiName: "myRestApi",
   deploy: true,
   defaultCorsPreflightOptions: {
     allowOrigins: Cors.ALL_ORIGINS, // Restrict this to domains you trust
@@ -119,7 +118,6 @@ backend.auth.resources.unauthenticatedUserIamRole.attachInlinePolicy(
 const ecrRepositeory = ecr.Repository.fromRepositoryName(apiStack, 'Agents', 'daas-agents');
 
 const pythonLambdaDocker = new lambda.DockerImageFunction(apiStack, 'PythonLambdaDocker', {
-  functionName: 'PythonLambdaDocker',
   code: lambda.DockerImageCode.fromEcr(ecrRepositeory),
   timeout: Duration.seconds(300),
 });

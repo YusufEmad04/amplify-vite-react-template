@@ -129,6 +129,7 @@ pythonLambdaDocker.addToRolePolicy(
   })
 );
 
+pythonLambda.addEnvironment('FUNCTION_NAME', pythonLambdaDocker.functionName);
 //TODO: add graphql app id to env vars of docker
 
 const retrieveSecretsCommands = `secret_json=$(aws secretsmanager get-secret-value --secret-id daas-secrets)

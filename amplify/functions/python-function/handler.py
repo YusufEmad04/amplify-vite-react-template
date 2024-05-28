@@ -23,7 +23,7 @@ def lambda_handler(event, context):
 
     # invoke the lambda function called PythonLambdaDocker
     response = client.invoke(
-        FunctionName='PythonLambdaDocker',
+        FunctionName=os.environ['FUNCTION_NAME'],
         InvocationType='Event',
         Payload=json.dumps(
             {
